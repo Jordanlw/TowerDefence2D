@@ -5,7 +5,7 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
 
-    GameObject tileManager;
+    static GameObject tileManager;
     public TileManager.ButtonWallState type = TileManager.ButtonWallState.EMPTY;
     public int x, y, g = 1;
     public int h
@@ -28,7 +28,10 @@ public class Tile : MonoBehaviour
 
     void Start()
     {
-        tileManager = GameObject.Find("TileManager");
+        if(tileManager == null)
+        {
+            tileManager = GameObject.Find("TileManager");
+        }
     }
 
     private void OnMouseOver()
@@ -38,6 +41,7 @@ public class Tile : MonoBehaviour
             switch (tileManager.GetComponent<TileManager>().buttonWallState)
             {
                 case TileManager.ButtonWallState.EMPTY:
+                    tileManager.GetComponent<TileManager>().updatePath = true;
                     GetComponent<SpriteRenderer>().sprite = empty;
                     type = TileManager.ButtonWallState.EMPTY;
                     break;

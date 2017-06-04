@@ -49,7 +49,7 @@ public class TileManager : MonoBehaviour
             List<Tile> path = new List<Tile>(FindPath().ToArray());
             if (path[path.Count - 1].Equals(enemyDestination))
             {
-                print("Path to enemyDestination found");
+                //print("Path to enemyDestination found");
             }
             foreach (var tile in tiles)
             {
@@ -117,11 +117,11 @@ public class TileManager : MonoBehaviour
             }
             if (closed.Contains(enemyDestination))
             {
-                print("closed contains enemyDestination");
+                //print("closed contains enemyDestination");
                 return MakePath();
             }
         }
-        print("open is empty");
+        //print("open is empty");
         return MakePath();
     }
 
@@ -146,7 +146,7 @@ public class TileManager : MonoBehaviour
     {
         Stack<Tile> path = new Stack<Tile>();
         path.Push(enemyDestination);
-        print("Making Path");
+        //print("Making Path");
         while (!path.Contains(enemySpawn))
         {
             path.Push(path.Peek().parent);
