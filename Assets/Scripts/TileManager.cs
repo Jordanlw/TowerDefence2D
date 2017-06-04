@@ -11,11 +11,12 @@ public class TileManager : MonoBehaviour
         WALL
     }
     public ButtonWallState buttonWallState = ButtonWallState.EMPTY;
-    public GameObject tile;
+    public GameObject tile, background;
     public int size = 40;
     public List<Tile> tiles = new List<Tile>();
+    Stack<Tile> path = new Stack<Tile>();
     public Tile enemySpawn, enemyDestination;
-    public bool updatePath;
+    public bool isPathChanged;
 
     // Use this for initialization
     void Start()
@@ -43,13 +44,14 @@ public class TileManager : MonoBehaviour
 
     void Update()
     {
-        if(updatePath && Input.GetMouseButtonUp(0))
+        if (isPathChanged)
         {
-            updatePath = false;
-            List<Tile> path = new List<Tile>(FindPath().ToArray());
-            if (path[path.Count - 1].Equals(enemyDestination))
+            isPathChanged = false;
+            print("Updating path");
+            UpdatePath();
+            if (path.Contains(enemyDestination))
             {
-                //print("Path to enemyDestination found");
+                print("Path to enemyDestination found");
             }
             foreach (var tile in tiles)
             {
@@ -57,9 +59,23 @@ public class TileManager : MonoBehaviour
             }
             foreach (var tile in path)
             {
-                tile.GetComponent<SpriteRenderer>().color = Color.blue;
+                print("tile in path");
+                tile.GetComponent<SpriteRenderer>().color = new Color(1, 0, 0, 0.3f);
             }
         }
+        background.transform.localScale = new Vector3(Screen.width, Screen.height, 1);
+    }
+
+    public bool isPathable()
+    {
+        print("isPathable()");
+        UpdatePath();
+        if (path.Contains(enemyDestination))
+        {
+            return true;
+        }
+        print("Path does not contain enemyDestination");
+        return false;
     }
 
     public void SetButtonState(string state)
@@ -77,8 +93,9 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    public Stack<Tile> FindPath()
+    public void UpdatePath()
     {
+        print("UpdatePath()");
         HashSet<Tile> open = new HashSet<Tile>();
         HashSet<Tile> closed = new HashSet<Tile>();
         open.Add(enemySpawn);
@@ -86,10 +103,12 @@ public class TileManager : MonoBehaviour
         foreach (var tile in tiles)
         {
             tile.g = 1;
+            tile.parent = null;
         }
+        Tile current = null;
         while (open.Count > 0)
         {
-            Tile current = FindLowestF(open);
+            current = FindLowestF(open);
             open.Remove(current);
             closed.Add(current);
             //print("Size of closed: " + closed.Count);
@@ -117,12 +136,14 @@ public class TileManager : MonoBehaviour
             }
             if (closed.Contains(enemyDestination))
             {
-                //print("closed contains enemyDestination");
-                return MakePath();
+                print("closed contains enemyDestination");
+                MakePath(current);
+                return;
             }
         }
-        //print("open is empty");
-        return MakePath();
+        print("open is empty");
+        MakePath(current);
+        return;
     }
 
     void calculateTile(Tile current, Tile selection, HashSet<Tile> open)
@@ -142,16 +163,15 @@ public class TileManager : MonoBehaviour
         }
     }
 
-    Stack<Tile> MakePath()
+    void MakePath(Tile last)
     {
-        Stack<Tile> path = new Stack<Tile>();
-        path.Push(enemyDestination);
-        //print("Making Path");
+        path.Clear();
+        path.Push(last);
+        print("Making Path");
         while (!path.Contains(enemySpawn))
         {
             path.Push(path.Peek().parent);
         }
-        return path;
     }
 
     Tile FindLowestF(HashSet<Tile> open)
